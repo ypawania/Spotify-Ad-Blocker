@@ -53,7 +53,7 @@ user_headers = {
     "Authorization": "Bearer " + token,
     "Content-Type": "application/json"
 }
-
+print('program started')
 while True:
     if (paused > 40):
         break
@@ -69,6 +69,8 @@ while True:
     else: 
         if mute == True:
             unmute_windows()
-    time.sleep(2)
+            mute = False
+    time.sleep(3)
 unmute_windows()
+print('PROGRAM ENDED')
 
