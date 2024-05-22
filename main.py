@@ -4,6 +4,7 @@ from pycaw.pycaw import AudioUtilities, ISimpleAudioVolume
 import base64
 from urllib.parse import urlencode
 import webbrowser
+import os
 import requests
 import config
 import time
@@ -11,6 +12,10 @@ paused = 0
 client_id = config.CLIENT_ID
 client_secret = config.CLIENT_SECRET
 mute = False
+
+webbrowser.open_new('file://' + os.path.realpath('file:///C:/Users/ypawa/OneDrive/Documents/GitHub/Spotify-Ad-Blocker/lyrics.html'))
+f = open("lyrics.html", "w")
+
 def mute_windows():
     sessions = AudioUtilities.GetAllSessions()
     for session in sessions:
@@ -54,11 +59,31 @@ user_headers = {
     "Content-Type": "application/json"
 }
 print('program started')
+
+song_name = ''
 while True:
     if (paused > 40):
         break
     playback_response = requests.get('https://api.spotify.com/v1/me/player', headers=user_headers)
     playback_response = playback_response.json()
+    current_song_name = playback_response["item"]["name"]
+    
+    #if song detected on last api api call is not same as song detected on current api call:
+    #call lyrics
+    #update lyrics html
+    if (song_name != current_song_name):
+        artist_name = playback_response["item"]["artists"][0]["name"]
+        lyrics_api_call = 'https://api.lyrics.ovh/v1/' + artist_name + '/' + current_song_name
+        r = requests.get(lyrics_api_call)
+        lyrics = r.json()['lyrics']
+        lyrics = lyrics.replace('\r\n', '<br>')
+        lyrics = lyrics.replace('\n', '<br>')
+        
+        f = open("lyrics.html", "w")
+        f.write("<html><head><title>song lyrics</title></head><body><h1>Start listening and reload page to find your song lyrics</h1><br>"+lyrics+"</body></html>")
+        f.close()
+        
+    song_name = current_song_name    
     if 'pausing' in (playback_response["actions"]['disallows']):
         paused += 1
     if (playback_response["currently_playing_type"]) == 'ad':
