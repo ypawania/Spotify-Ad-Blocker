@@ -66,30 +66,31 @@ while True:
         break
     playback_response = requests.get('https://api.spotify.com/v1/me/player', headers=user_headers)
     playback_response = playback_response.json()
-    current_song_name = playback_response["item"]["name"]
-    
-    #if song detected on last api api call is not same as song detected on current api call:
-    #call lyrics
-    #update lyrics html
-    if (song_name != current_song_name):
-        artist_name = playback_response["item"]["artists"][0]["name"]
-        lyrics_api_call = 'https://api.lyrics.ovh/v1/' + artist_name + '/' + current_song_name
-        try: 
-            r = requests.get(lyrics_api_call)
-            lyrics = r.json()['lyrics']
-            lyrics = lyrics.replace('\r\n', '<br>')
-            lyrics = lyrics.replace('\n', '<br>')
-            
-            f = open("lyrics.html", "w")
-            f.write("<html><head><title>song lyrics</title></head><body><h1>Start listening and reload page to find your song lyrics</h1><br>"+lyrics+"</body></html>")
-        except: 
-            print("no lyrics")    
-            f = open("lyrics.html", "w")
-            f.write("<html><head><title>song lyrics</title></head><body><h1>No Lyrics Available</h1><br>Lyrics not found for this song</body></html>")
-
-        f.close()
+    if (playback_response["currently_playing_type"]) != 'ad':
+        current_song_name = playback_response["item"]["name"]
         
-    song_name = current_song_name    
+        #if song detected on last api api call is not same as song detected on current api call:
+        #call lyrics
+         #update lyrics html
+        if (song_name != current_song_name):
+            artist_name = playback_response["item"]["artists"][0]["name"]
+            lyrics_api_call = 'https://api.lyrics.ovh/v1/' + artist_name + '/' + current_song_name
+            try: 
+                r = requests.get(lyrics_api_call)
+                lyrics = r.json()['lyrics']
+                lyrics = lyrics.replace('\r\n', '<br>')
+                lyrics = lyrics.replace('\n', '<br>')
+                
+                f = open("lyrics.html", "w")
+                f.write("<html><head><title>song lyrics</title><link rel='stylesheet' href='styles.css'><meta http-equiv='refresh' content='5' ></head><body><div class='container'><h1 id='title'>"+artist_name+" - " + current_song_name + "</h1></div><br><div id='lyrics'>"+lyrics+"</div></body></html>")
+            except: 
+                print("no lyrics")    
+                f = open("lyrics.html", "w")
+                f.write("<html><head><title>song lyrics</title><meta http-equiv='refresh' content='5' ></head><body><h1>No Lyrics Available</h1><br>Lyrics not found for this song</body></html>")
+            #webbrowser.open('file:///C:/Users/ypawa/OneDrive/Documents/GitHub/Spotify-Ad-Blocker/lyrics.html', new=0 )
+            f.close()
+            
+        song_name = current_song_name    
     if 'pausing' in (playback_response["actions"]['disallows']):
         paused += 1
     if (playback_response["currently_playing_type"]) == 'ad':
@@ -103,5 +104,5 @@ while True:
             mute = False
     time.sleep(3)
 unmute_windows()
-print('PROGRAM ENDED')
+print('PROGRAM ENDED - Timout')
 
