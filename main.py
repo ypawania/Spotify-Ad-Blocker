@@ -74,13 +74,19 @@ while True:
     if (song_name != current_song_name):
         artist_name = playback_response["item"]["artists"][0]["name"]
         lyrics_api_call = 'https://api.lyrics.ovh/v1/' + artist_name + '/' + current_song_name
-        r = requests.get(lyrics_api_call)
-        lyrics = r.json()['lyrics']
-        lyrics = lyrics.replace('\r\n', '<br>')
-        lyrics = lyrics.replace('\n', '<br>')
-        
-        f = open("lyrics.html", "w")
-        f.write("<html><head><title>song lyrics</title></head><body><h1>Start listening and reload page to find your song lyrics</h1><br>"+lyrics+"</body></html>")
+        try: 
+            r = requests.get(lyrics_api_call)
+            lyrics = r.json()['lyrics']
+            lyrics = lyrics.replace('\r\n', '<br>')
+            lyrics = lyrics.replace('\n', '<br>')
+            
+            f = open("lyrics.html", "w")
+            f.write("<html><head><title>song lyrics</title></head><body><h1>Start listening and reload page to find your song lyrics</h1><br>"+lyrics+"</body></html>")
+        except: 
+            print("no lyrics")    
+            f = open("lyrics.html", "w")
+            f.write("<html><head><title>song lyrics</title></head><body><h1>No Lyrics Available</h1><br>Lyrics not found for this song</body></html>")
+
         f.close()
         
     song_name = current_song_name    
